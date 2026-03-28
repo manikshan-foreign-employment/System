@@ -494,11 +494,16 @@
     
     <div class="overlay" id="m-sale"><div class="modal"><div class="modal-head"><span class="modal-title" style="font-weight:700; font-size:1.1rem;">New Transaction</span> <i class="fas fa-times" onclick="app.closeModal()" style="cursor:pointer; font-size:1.2rem;"></i></div><div class="modal-body">
         
-        <div style="margin-bottom:20px;"><label>Customer Name</label><input type="text" id="f-s-customer" class="form-control" placeholder="Enter Customer Name (Optional)"></div>
+        <!-- Updated Customer Name field with Datalist for Auto-complete -->
+        <div style="margin-bottom:20px;">
+            <label>Customer Name</label>
+            <input type="text" id="f-s-customer" class="form-control" list="dl-customers" placeholder="Enter Customer Name (Optional)">
+            <datalist id="dl-customers"></datalist>
+        </div>
         
         <div style="margin-bottom:20px;"><label>Date</label><input type="date" id="f-s-date" class="form-control"></div><div style="margin-bottom:20px;"><label>Select Product</label><input type="text" id="f-s-name" class="form-control" list="dl-prod" oninput="app.fillSale(this.value)" placeholder="Search inventory..."><datalist id="dl-prod"></datalist></div><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Quantity</label><input type="number" id="f-s-qty" class="form-control" oninput="app.calcSale()"></div><div class="filter-item"><label>Payment Type</label><select id="f-s-mode" class="form-control" onchange="app.toggleCheque(this.value)"><option>Cash</option><option>Credit</option><option>Cheque</option></select></div></div><div id="cheque-wrap" class="cheque-section" style="display:none;"><h5 style="margin-bottom:15px; color:var(--text-main);"><i class="fas fa-money-check-alt"></i> Cheque Details</h5><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Cheque No.</label><input type="text" id="f-s-ch-no" class="form-control"></div><div class="filter-item"><label>Cheque Date</label><input type="date" id="f-s-ch-date" class="form-control"></div></div></div><div style="margin-top:25px; background:#f0fdf4; padding:15px; border-radius:10px; border:1px solid #bbf7d0;"><label style="color:#15803d;">Gross Total Amount (LKR)</label><input type="number" id="f-s-amt" class="form-control" style="font-size:1.5rem; font-weight:800; color:#15803d; border:none; background:transparent; height:auto; padding:0;" readonly></div><button class="btn btn-success w-full" style="margin-top:25px; height:50px;" onclick="app.saveSale()">Complete Transaction</button></div></div></div>
     
-    <!-- Updated Invoice Modal with Company and Customer details -->
+    <!-- Updated Invoice Modal with Auto-complete for Company and Customer details -->
     <div class="overlay" id="m-invoice-setup"><div class="modal"><div class="modal-head"><span class="modal-title" style="font-weight:700;">Generate Professional Invoice</span> <i class="fas fa-times" onclick="app.closeModal()" style="cursor:pointer;"></i></div><div class="modal-body">
         
         <h5 style="margin-bottom:15px; color:var(--primary); font-size:0.9rem;">Your Company Details</h5>
@@ -508,7 +513,11 @@
         <hr style="border:0; border-top:1px dashed var(--border); margin-bottom:20px;">
         <h5 style="margin-bottom:15px; color:var(--text-main); font-size:0.9rem;">Bill To (Customer Details)</h5>
         
-        <div style="margin-bottom:15px;"><label>Customer Name</label><input type="text" id="b-contact" class="form-control" placeholder="Enter Customer Name"></div>
+        <div style="margin-bottom:15px;">
+            <label>Customer Name</label>
+            <input type="text" id="b-contact" class="form-control" list="dl-inv-customers" oninput="app.fillCustomer(this.value)" placeholder="Enter Customer Name">
+            <datalist id="dl-inv-customers"></datalist>
+        </div>
         <div style="margin-bottom:15px;"><label>Customer Address</label><input type="text" id="b-address" class="form-control" placeholder="Enter Billing Address"></div>
         <div style="margin-bottom:25px;"><label>Customer Email / Mobile</label><input type="text" id="b-email" class="form-control" placeholder="Enter Contact Info"></div>
         <button class="btn btn-primary w-full" onclick="app.downloadInvoice()">Download PDF Invoice</button></div></div></div>
@@ -580,6 +589,7 @@
                 onSnapshot(collection(db, "sales"), s => {
                     app.sales = s.docs.map(d => ({id: d.id, ...d.data()}));
                     app.renderSales(); 
+                    app.updateDatalist(); // Navin grahak yadi update kara (Update new customer list)
                     
                     if(document.getElementById('v-search').style.display === 'block') app.renderInquiry();
                     if(app.userRole === 'admin') app.renderExecProfit();
@@ -1275,6 +1285,19 @@
                 const contact = document.getElementById('b-contact').value || "-";
                 const address = document.getElementById('b-address').value || "-";
                 const email = document.getElementById('b-email').value || "-";
+
+                // Grahak mahiti save kara (Save new invoice customer details locally)
+                if (contact !== "-" && contact.trim() !== "") {
+                    let savedCusts = JSON.parse(localStorage.getItem('ms_customers') || '[]');
+                    const existingIndex = savedCusts.findIndex(c => c.name === contact);
+                    if (existingIndex > -1) {
+                        savedCusts[existingIndex] = { name: contact, address, email };
+                    } else {
+                        savedCusts.push({ name: contact, address, email });
+                    }
+                    localStorage.setItem('ms_customers', JSON.stringify(savedCusts));
+                    app.updateDatalist();
+                }
                 
                 doc.setFont("helvetica", "bold"); doc.setTextColor(0); doc.text("Bill To:", 120, 48);
                 doc.setFont("helvetica", "normal"); doc.setTextColor(80);
@@ -1329,7 +1352,34 @@
             updateDatalist: () => {
                 const dl = document.getElementById('dl-prod'); dl.innerHTML = '';
                 app.inventory.filter(i=>i.status==='Active').forEach(i=>dl.innerHTML += `<option value="${i.name} (${i.branch})">`);
+                
+                // Navin grahak yadi update kara (Update sales customer datalist)
+                const dlCust = document.getElementById('dl-customers');
+                if (dlCust) {
+                    dlCust.innerHTML = '';
+                    const uniqueCustomers = [...new Set(app.sales.map(s => s.customer).filter(c => c && c.trim() !== ''))];
+                    uniqueCustomers.forEach(c => dlCust.innerHTML += `<option value="${c}">`);
+                }
+
+                // Invoice grahak yadi update kara (Update invoice customer datalist)
+                const dlInvCust = document.getElementById('dl-inv-customers');
+                if (dlInvCust) {
+                    dlInvCust.innerHTML = '';
+                    let savedCusts = JSON.parse(localStorage.getItem('ms_customers') || '[]');
+                    savedCusts.forEach(c => dlInvCust.innerHTML += `<option value="${c.name}">`);
+                }
             },
+
+            // Grahakachi mahiti bhara (Auto-fill invoice customer details)
+            fillCustomer: (v) => {
+                let savedCusts = JSON.parse(localStorage.getItem('ms_customers') || '[]');
+                const c = savedCusts.find(x => x.name === v);
+                if (c) {
+                    document.getElementById('b-address').value = c.address !== "-" ? c.address : "";
+                    document.getElementById('b-email').value = c.email !== "-" ? c.email : "";
+                }
+            },
+
             fillSale: (v) => { const i = app.inventory.find(x=>`${x.name} (${x.branch})`===v); if(i) { window.sPrice = i.sellPrice; document.getElementById('f-s-amt').value = i.sellPrice; }},
             calcSale: () => document.getElementById('f-s-amt').value = document.getElementById('f-s-qty').value * (window.sPrice||0),
 
