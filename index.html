@@ -501,7 +501,7 @@
             <datalist id="dl-customers"></datalist>
         </div>
         
-        <div style="margin-bottom:20px;"><label>Date</label><input type="date" id="f-s-date" class="form-control"></div><div style="margin-bottom:20px;"><label>Select Product</label><input type="text" id="f-s-name" class="form-control" list="dl-prod" oninput="app.fillSale(this.value)" placeholder="Search inventory..."><datalist id="dl-prod"></datalist></div><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Quantity</label><input type="number" id="f-s-qty" class="form-control" oninput="app.calcSale()"></div><div class="filter-item"><label>Payment Type</label><select id="f-s-mode" class="form-control" onchange="app.toggleCheque(this.value)"><option>Cash</option><option>Credit</option><option>Cheque</option></select></div></div><div id="cheque-wrap" class="cheque-section" style="display:none;"><h5 style="margin-bottom:15px; color:var(--text-main);"><i class="fas fa-money-check-alt"></i> Cheque Details</h5><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Cheque No.</label><input type="text" id="f-s-ch-no" class="form-control"></div><div class="filter-item"><label>Cheque Date</label><input type="date" id="f-s-ch-date" class="form-control"></div></div></div><div style="margin-top:25px; background:#f0fdf4; padding:15px; border-radius:10px; border:1px solid #bbf7d0;"><label style="color:#15803d;">Gross Total Amount (LKR)</label><input type="number" id="f-s-amt" class="form-control" style="font-size:1.5rem; font-weight:800; color:#15803d; border:none; background:transparent; height:auto; padding:0;" readonly></div><button class="btn btn-success w-full" style="margin-top:25px; height:50px;" onclick="app.saveSale()">Complete Transaction</button></div></div></div>
+        <div class="grid-filters" style="margin-bottom:20px;"><div class="filter-item"><label>Branch</label><select id="f-s-branch" class="form-control" onchange="app.filterProductsByBranch(true)"><option value="Colombo">Colombo</option><option value="Negombo">Negombo</option></select></div><div class="filter-item"><label>Date</label><input type="date" id="f-s-date" class="form-control"></div></div><div style="margin-bottom:20px;"><label>Select Product</label><input type="text" id="f-s-name" class="form-control" list="dl-prod" oninput="app.fillSale(this.value)" placeholder="Search inventory..."><datalist id="dl-prod"></datalist></div><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Quantity</label><input type="number" id="f-s-qty" class="form-control" oninput="app.calcSale()"></div><div class="filter-item"><label>Payment Type</label><select id="f-s-mode" class="form-control" onchange="app.toggleCheque(this.value)"><option>Cash</option><option>Credit</option><option>Cheque</option></select></div></div><div id="cheque-wrap" class="cheque-section" style="display:none;"><h5 style="margin-bottom:15px; color:var(--text-main);"><i class="fas fa-money-check-alt"></i> Cheque Details</h5><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Cheque No.</label><input type="text" id="f-s-ch-no" class="form-control"></div><div class="filter-item"><label>Cheque Date</label><input type="date" id="f-s-ch-date" class="form-control"></div></div></div><div style="margin-top:25px; background:#f0fdf4; padding:15px; border-radius:10px; border:1px solid #bbf7d0;"><label style="color:#15803d;">Gross Total Amount (LKR)</label><input type="number" id="f-s-amt" class="form-control" style="font-size:1.5rem; font-weight:800; color:#15803d; border:none; background:transparent; height:auto; padding:0;" readonly></div><button class="btn btn-success w-full" style="margin-top:25px; height:50px;" onclick="app.saveSale()">Complete Transaction</button></div></div></div>
     
     <!-- Updated Invoice Modal with Auto-complete for Company and Customer details -->
     <div class="overlay" id="m-invoice-setup"><div class="modal"><div class="modal-head"><span class="modal-title" style="font-weight:700;">Generate Professional Invoice</span> <i class="fas fa-times" onclick="app.closeModal()" style="cursor:pointer;"></i></div><div class="modal-body">
@@ -1341,6 +1341,8 @@
                 if(m==='sale') {
                     document.getElementById('f-s-customer').value=''; 
                     document.getElementById('f-s-date').value = new Date().toISOString().split('T')[0]; 
+                    document.getElementById('f-s-branch').value = 'Colombo'; 
+                    app.filterProductsByBranch(true); 
                     document.getElementById('cheque-wrap').style.display='none';
                     document.getElementById('f-s-name').value=''; 
                     document.getElementById('f-s-qty').value=''; 
@@ -1349,9 +1351,25 @@
             },
             closeModal: () => document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'),
             toast: (m) => { const t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3000); },
+            
+            filterProductsByBranch: (resetInput = false) => {
+                const branch = document.getElementById('f-s-branch') ? document.getElementById('f-s-branch').value : 'Colombo';
+                const dl = document.getElementById('dl-prod'); 
+                if(!dl) return;
+                dl.innerHTML = '';
+                app.inventory.filter(i=>i.status==='Active' && i.branch === branch).forEach(i=>dl.innerHTML += `<option value="${i.name} (${i.branch})">`);
+                
+                if(resetInput) {
+                    const nameField = document.getElementById('f-s-name');
+                    if(nameField) nameField.value = '';
+                    const amtField = document.getElementById('f-s-amt');
+                    if(amtField) amtField.value = '';
+                    window.sPrice = 0;
+                }
+            },
+
             updateDatalist: () => {
-                const dl = document.getElementById('dl-prod'); dl.innerHTML = '';
-                app.inventory.filter(i=>i.status==='Active').forEach(i=>dl.innerHTML += `<option value="${i.name} (${i.branch})">`);
+                app.filterProductsByBranch(false);
                 
                 // Navin grahak yadi update kara (Update sales customer datalist)
                 const dlCust = document.getElementById('dl-customers');
