@@ -196,7 +196,7 @@
 
             <div class="content-body">
 
-                <!-- Inventory (Now Default View) -->
+                <!-- Inventory -->
                 <div id="v-inv" style="display:block;">
                     <div class="card">
                         <div class="grid-filters">
@@ -219,7 +219,6 @@
                             <button id="btn-new-sale" class="btn btn-success" onclick="app.openModal('sale')" style="height:44px;"><i class="fas fa-shopping-cart"></i> New Sale</button>
                             <button class="btn btn-ghost" onclick="app.openModal('invoice-setup')" style="height:44px;"><i class="fas fa-file-invoice"></i> Generate Invoice</button>
                         </div>
-                        <!-- GROUPED SALES CONTAINER -->
                         <div id="sales-group-container"></div>
                     </div>
                 </div>
@@ -235,7 +234,7 @@
                     </div>
                 </div>
 
-                <!-- Reports (LOCKED) -->
+                <!-- Reports -->
                 <div id="v-reports" style="display:none;">
                     <div id="reports-lock" class="lock-wrapper">
                         <div class="lock-icon-bg" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-file-pdf"></i></div>
@@ -283,7 +282,7 @@
                     </div>
                 </div>
 
-                <!-- Item Inquiry (Moved Below Reports) -->
+                <!-- Item Inquiry -->
                 <div id="v-search" style="display:none;">
                     <div class="card">
                         <div class="grid-filters" style="margin-bottom:0;">
@@ -313,9 +312,7 @@
                     </div>
 
                     <div id="inq-results">
-                        <!-- Summary Totals with Branch sub-totals -->
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:25px;">
-                            
                             <div class="card" style="border-top: 4px solid #8b5cf6; margin-bottom:0; padding:20px;">
                                 <small style="color:var(--text-muted); font-weight:700; font-size:0.7rem; text-transform:uppercase;">Total Procured (Added)</small>
                                 <h2 id="inq-tot-all" style="color:#8b5cf6; margin-top:5px; margin-bottom:10px;">0</h2>
@@ -324,8 +321,6 @@
                                     <span>Negombo: <strong id="inq-all-neg" style="color:var(--text-main);">0</strong></span>
                                 </div>
                             </div>
-
-                            <!-- Dynamically Calculated Available Stock -->
                             <div class="card" style="border-top: 4px solid var(--success); margin-bottom:0; padding:20px;">
                                 <small style="color:var(--text-muted); font-weight:700; font-size:0.7rem; text-transform:uppercase;">Available Stock (Current)</small>
                                 <h2 id="inq-tot-active" style="color:var(--success); margin-top:5px; margin-bottom:10px;">0</h2>
@@ -334,7 +329,6 @@
                                     <span>Negombo: <strong id="inq-act-neg" style="color:var(--text-main);">0</strong></span>
                                 </div>
                             </div>
-
                             <div class="card" style="border-top: 4px solid var(--primary); margin-bottom:0; padding:20px;">
                                 <small style="color:var(--text-muted); font-weight:700; font-size:0.7rem; text-transform:uppercase;">Total Sold Items</small>
                                 <h2 id="inq-tot-sold" style="color:var(--primary); margin-top:5px; margin-bottom:10px;">0</h2>
@@ -343,7 +337,6 @@
                                     <span>Negombo: <strong id="inq-sold-neg" style="color:var(--text-main);">0</strong></span>
                                 </div>
                             </div>
-
                             <div class="card" style="border-top: 4px solid var(--danger); margin-bottom:0; padding:20px;">
                                 <small style="color:var(--text-muted); font-weight:700; font-size:0.7rem; text-transform:uppercase;">Total Damaged Items</small>
                                 <h2 id="inq-tot-damage" style="color:var(--danger); margin-top:5px; margin-bottom:10px;">0</h2>
@@ -354,9 +347,7 @@
                             </div>
                         </div>
 
-                        <!-- Separated Tables for Clarity and Professional Look -->
                         <div class="card" style="padding: 25px;">
-                            
                             <h4 class="section-title" style="border-color: var(--success);"><i class="fas fa-layer-group" style="color:var(--success);"></i> 1. Current Availability Status</h4>
                             <div class="table-container">
                                 <table>
@@ -404,7 +395,6 @@
                                     <tbody id="t-inq-dmg"></tbody>
                                 </table>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -494,16 +484,78 @@
     
     <div class="overlay" id="m-sale"><div class="modal"><div class="modal-head"><span class="modal-title" style="font-weight:700; font-size:1.1rem;">New Transaction</span> <i class="fas fa-times" onclick="app.closeModal()" style="cursor:pointer; font-size:1.2rem;"></i></div><div class="modal-body">
         
-        <!-- Updated Customer Name field with Datalist for Auto-complete -->
         <div style="margin-bottom:20px;">
             <label>Customer Name</label>
             <input type="text" id="f-s-customer" class="form-control" list="dl-customers" placeholder="Enter Customer Name (Optional)">
             <datalist id="dl-customers"></datalist>
         </div>
         
-        <div class="grid-filters" style="margin-bottom:20px;"><div class="filter-item"><label>Branch</label><select id="f-s-branch" class="form-control" onchange="app.filterProductsByBranch(true)"><option value="Colombo">Colombo</option><option value="Negombo">Negombo</option></select></div><div class="filter-item"><label>Date</label><input type="date" id="f-s-date" class="form-control"></div></div><div style="margin-bottom:20px;"><label>Select Product</label><input type="text" id="f-s-name" class="form-control" list="dl-prod" oninput="app.fillSale(this.value)" placeholder="Search inventory..."><datalist id="dl-prod"></datalist></div><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Quantity</label><input type="number" id="f-s-qty" class="form-control" oninput="app.calcSale()"></div><div class="filter-item"><label>Payment Type</label><select id="f-s-mode" class="form-control" onchange="app.toggleCheque(this.value)"><option>Cash</option><option>Credit</option><option>Cheque</option></select></div></div><div id="cheque-wrap" class="cheque-section" style="display:none;"><h5 style="margin-bottom:15px; color:var(--text-main);"><i class="fas fa-money-check-alt"></i> Cheque Details</h5><div class="grid-filters" style="margin-bottom:0;"><div class="filter-item"><label>Cheque No.</label><input type="text" id="f-s-ch-no" class="form-control"></div><div class="filter-item"><label>Cheque Date</label><input type="date" id="f-s-ch-date" class="form-control"></div></div></div><div style="margin-top:25px; background:#f0fdf4; padding:15px; border-radius:10px; border:1px solid #bbf7d0;"><label style="color:#15803d;">Gross Total Amount (LKR)</label><input type="number" id="f-s-amt" class="form-control" style="font-size:1.5rem; font-weight:800; color:#15803d; border:none; background:transparent; height:auto; padding:0;" readonly></div><button class="btn btn-success w-full" style="margin-top:25px; height:50px;" onclick="app.saveSale()">Complete Transaction</button></div></div></div>
+        <div class="grid-filters" style="margin-bottom:20px;">
+            <div class="filter-item">
+                <label>Branch</label>
+                <select id="f-s-branch" class="form-control" onchange="app.filterProductsByBranch(true)">
+                    <option value="Colombo">Colombo</option>
+                    <option value="Negombo">Negombo</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Date</label>
+                <input type="date" id="f-s-date" class="form-control">
+            </div>
+        </div>
+        
+        <div style="margin-bottom:20px;">
+            <label>Select Product</label>
+            <input type="text" id="f-s-name" class="form-control" list="dl-prod" oninput="app.fillSale(this.value)" placeholder="Search inventory...">
+            <datalist id="dl-prod"></datalist>
+        </div>
+        
+        <div class="grid-filters" style="margin-bottom:0;">
+            <div class="filter-item">
+                <label>Quantity</label>
+                <input type="number" id="f-s-qty" class="form-control" oninput="app.calcSale()">
+            </div>
+            <div class="filter-item">
+                <label>Payment Type</label>
+                <select id="f-s-mode" class="form-control" onchange="app.toggleCheque(this.value)">
+                    <option value="Cash">Cash</option>
+                    <option value="Credit">Credit</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Bank Deposit">Bank Deposit</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="cheque-wrap" class="cheque-section" style="display:none;">
+            <h5 style="margin-bottom:15px; color:var(--text-main);"><i class="fas fa-money-check-alt"></i> Cheque Details</h5>
+            <div class="grid-filters" style="margin-bottom:0;">
+                <div class="filter-item"><label>Cheque No.</label><input type="text" id="f-s-ch-no" class="form-control"></div>
+                <div class="filter-item"><label>Cheque Date</label><input type="date" id="f-s-ch-date" class="form-control"></div>
+            </div>
+        </div>
+
+        <div id="bank-wrap" class="cheque-section" style="display:none; border:1px solid #93c5fd; background:#eff6ff;">
+            <h5 style="margin-bottom:15px; color:#1d4ed8;"><i class="fas fa-university"></i> Bank Deposit Details</h5>
+            <div class="filter-item" style="margin-bottom:0;">
+                <label style="color:#1e40af;">Select Bank</label>
+                <select id="f-s-bank" class="form-control" style="border-color:#bfdbfe;">
+                    <option value="BOC">BOC</option>
+                    <option value="Com Bank">Com Bank</option>
+                    <option value="DFCC">DFCC</option>
+                    <option value="HNB">HNB</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin-top:25px; background:#f0fdf4; padding:15px; border-radius:10px; border:1px solid #bbf7d0;">
+            <label style="color:#15803d;">Gross Total Amount (LKR)</label>
+            <input type="number" id="f-s-amt" class="form-control" style="font-size:1.5rem; font-weight:800; color:#15803d; border:none; background:transparent; height:auto; padding:0;" readonly>
+        </div>
+        
+        <button class="btn btn-success w-full" style="margin-top:25px; height:50px;" onclick="app.saveSale()">Complete Transaction</button>
+    </div></div></div>
     
-    <!-- Updated Invoice Modal with Auto-complete for Company and Customer details -->
+    <!-- Invoice Modal -->
     <div class="overlay" id="m-invoice-setup"><div class="modal"><div class="modal-head"><span class="modal-title" style="font-weight:700;">Generate Professional Invoice</span> <i class="fas fa-times" onclick="app.closeModal()" style="cursor:pointer;"></i></div><div class="modal-body">
         
         <h5 style="margin-bottom:15px; color:var(--primary); font-size:0.9rem;">Your Company Details</h5>
@@ -589,7 +641,7 @@
                 onSnapshot(collection(db, "sales"), s => {
                     app.sales = s.docs.map(d => ({id: d.id, ...d.data()}));
                     app.renderSales(); 
-                    app.updateDatalist(); // Navin grahak yadi update kara (Update new customer list)
+                    app.updateDatalist(); 
                     
                     if(document.getElementById('v-search').style.display === 'block') app.renderInquiry();
                     if(app.userRole === 'admin') app.renderExecProfit();
@@ -1011,13 +1063,19 @@
                         const actionHtml = app.userRole === 'admin'
                             ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger); border-color:#fee2e2; background:#fef2f2;" onclick="app.delSale('${s.id}')"><i class="fas fa-trash-alt"></i></button>`
                             : `<span style="color:#cbd5e1; font-size:0.8rem;">-</span>`;
+                            
+                        // Adjust badge for Bank Deposit nicely
+                        let modeBadgeClass = 'badge-avail';
+                        if (s.mode === 'Credit') modeBadgeClass = 'badge-damage';
+                        else if (s.mode === 'Cheque') modeBadgeClass = 'badge-colombo';
+                        else if (s.mode.includes('Bank')) modeBadgeClass = 'badge-colombo';
 
                         html += `<tr>
                             <td style="text-align:center;"><input type="checkbox" class="sale-sel" data-id="${s.id}" style="cursor:pointer; width:16px; height:16px; accent-color:var(--primary);"></td>
                             <td><span style="color:var(--text-muted); font-size:0.8rem;"><i class="far fa-calendar-alt"></i> ${s.date}</span></td>
                             <td><strong style="color:var(--text-main); font-size:0.9rem;">${s.item}</strong></td>
                             <td style="text-align:center;"><span style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-weight:700; font-size:0.8rem;">${s.qty}</span></td>
-                            <td style="text-align:center;"><span class="badge ${s.mode === 'Cash' ? 'badge-avail' : (s.mode === 'Credit' ? 'badge-damage' : 'badge-colombo')}">${s.mode}</span></td>
+                            <td style="text-align:center;"><span class="badge ${modeBadgeClass}">${s.mode}</span></td>
                             <td style="text-align:right; font-weight:700; color:var(--text-main);">LKR ${parseFloat(s.amount).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                             <td style="text-align:right;">${actionHtml}</td>
                         </tr>`;
@@ -1090,7 +1148,12 @@
             },
 
             upExec: async (id, f, v) => { const u={}; u[f] = parseFloat(v) || 0; await updateDoc(doc(db,"inventory",id), u); },
-            toggleCheque: (v) => { document.getElementById('cheque-wrap').style.display = (v==='Cheque') ? 'block' : 'none'; },
+            
+            toggleCheque: (v) => { 
+                document.getElementById('cheque-wrap').style.display = (v==='Cheque') ? 'block' : 'none'; 
+                const bankWrap = document.getElementById('bank-wrap');
+                if(bankWrap) bankWrap.style.display = (v==='Bank Deposit') ? 'block' : 'none'; 
+            },
 
             genMasterPDF: async () => {
                 const branch = document.getElementById('master-rep-branch').value;
@@ -1286,7 +1349,6 @@
                 const address = document.getElementById('b-address').value || "-";
                 const email = document.getElementById('b-email').value || "-";
 
-                // Grahak mahiti save kara (Save new invoice customer details locally)
                 if (contact !== "-" && contact.trim() !== "") {
                     let savedCusts = JSON.parse(localStorage.getItem('ms_customers') || '[]');
                     const existingIndex = savedCusts.findIndex(c => c.name === contact);
@@ -1341,9 +1403,13 @@
                 if(m==='sale') {
                     document.getElementById('f-s-customer').value=''; 
                     document.getElementById('f-s-date').value = new Date().toISOString().split('T')[0]; 
-                    document.getElementById('f-s-branch').value = 'Colombo'; 
+                    if(document.getElementById('f-s-branch')) document.getElementById('f-s-branch').value = 'Colombo'; 
                     app.filterProductsByBranch(true); 
+                    
+                    document.getElementById('f-s-mode').value = 'Cash';
                     document.getElementById('cheque-wrap').style.display='none';
+                    if(document.getElementById('bank-wrap')) document.getElementById('bank-wrap').style.display='none';
+                    
                     document.getElementById('f-s-name').value=''; 
                     document.getElementById('f-s-qty').value=''; 
                     document.getElementById('f-s-amt').value='';
@@ -1371,7 +1437,6 @@
             updateDatalist: () => {
                 app.filterProductsByBranch(false);
                 
-                // Navin grahak yadi update kara (Update sales customer datalist)
                 const dlCust = document.getElementById('dl-customers');
                 if (dlCust) {
                     dlCust.innerHTML = '';
@@ -1379,7 +1444,6 @@
                     uniqueCustomers.forEach(c => dlCust.innerHTML += `<option value="${c}">`);
                 }
 
-                // Invoice grahak yadi update kara (Update invoice customer datalist)
                 const dlInvCust = document.getElementById('dl-inv-customers');
                 if (dlInvCust) {
                     dlInvCust.innerHTML = '';
@@ -1388,7 +1452,6 @@
                 }
             },
 
-            // Grahakachi mahiti bhara (Auto-fill invoice customer details)
             fillCustomer: (v) => {
                 let savedCusts = JSON.parse(localStorage.getItem('ms_customers') || '[]');
                 const c = savedCusts.find(x => x.name === v);
@@ -1461,13 +1524,18 @@
                 const n = document.getElementById('f-s-name').value;
                 const q = parseFloat(document.getElementById('f-s-qty').value)||0;
                 
+                let selectedMode = document.getElementById('f-s-mode').value;
+                if(selectedMode === 'Bank Deposit') {
+                    selectedMode = 'Bank Deposit (' + document.getElementById('f-s-bank').value + ')';
+                }
+                
                 const d = { 
                     customer: custName, 
                     timestamp: Date.now(), 
                     date: document.getElementById('f-s-date').value, 
                     item: n, 
                     qty: q, 
-                    mode: document.getElementById('f-s-mode').value, 
+                    mode: selectedMode, 
                     amount: parseFloat(document.getElementById('f-s-amt').value)||0, 
                     chNo: document.getElementById('f-s-ch-no').value, 
                     chDate: document.getElementById('f-s-ch-date').value 
